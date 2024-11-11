@@ -25,7 +25,7 @@ public class JobPost {
     private String description;
 
     @Column(name = "location")
-    private String location;
+    private Long locationId;
 
     @Column(name = "offer_status")
     private String status;

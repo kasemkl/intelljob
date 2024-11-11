@@ -32,7 +32,7 @@ public class JobPostService extends GenericService<JobPost,Long> {
 
         newJobPost.setDescription(jobPost.getDescription());
         newJobPost.setCompanyId(jobPost.getCompanyId());
-        newJobPost.setLocation(jobPost.getLocation());
+        newJobPost.setLocationId(jobPost.getLocationId());
         newJobPost.setStatus(jobPost.getStatus());
         newJobPost.setSalaryRange(jobPost.getSalaryRange());
         newJobPost.setTitle(jobPost.getTitle());
@@ -97,7 +97,7 @@ public class JobPostService extends GenericService<JobPost,Long> {
         // تحديث الحقول الخاصة بـ JobPost
         existingJobPost.setDescription(newjobPost.getDescription());
         existingJobPost.setCompanyId(newjobPost.getCompanyId());
-        existingJobPost.setLocation(newjobPost.getLocation());
+        existingJobPost.setLocationId(newjobPost.getLocationId());
         existingJobPost.setStatus(newjobPost.getStatus());
         existingJobPost.setSalaryRange(newjobPost.getSalaryRange());
         existingJobPost.setTitle(newjobPost.getTitle());

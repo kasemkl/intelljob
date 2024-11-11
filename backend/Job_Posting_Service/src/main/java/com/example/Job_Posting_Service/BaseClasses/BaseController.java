@@ -22,6 +22,7 @@ public abstract class BaseController<T,ID> {
         return service1.findById(id);
     }
 
+
     @PostMapping
     public T create(@RequestBody T entity) {
         return service1.save(entity);
