@@ -44,7 +44,8 @@ public class JobPost {
 
     private LocalDate postDate;
 
-    @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL)
+    @Transient
+    @OneToMany(mappedBy = "jobPost", cascade = CascadeType.PERSIST)
     private List<Requirement> requirements = new ArrayList<>();
 
     @ManyToMany

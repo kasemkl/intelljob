@@ -1,44 +1,46 @@
-package com.example.Job_Posting_Service.Controller;
+package com.example.Job_Posting_Service.BaseClasses;
 
-import com.example.Job_Posting_Service.Services.GenericService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
+@RestController
 public abstract class BaseController<T,ID> {
 
-    @Autowired
-    protected GenericService<T, ID> service;
+  @Autowired
+  protected GenericService <T,ID> service1;
 
     @GetMapping
     public List<T> getAll() {
-        return service.findAll();
+        return service1.findAll();
     }
 
     @GetMapping("/{id}")
     public Optional<T> getById(@PathVariable ID id) {
-        return service.findById(id);
+        return service1.findById(id);
     }
 
     @PostMapping
     public T create(@RequestBody T entity) {
-        return service.save(entity);
+        return service1.save(entity);
     }
 
     @PutMapping("/{id}")
     public T update(@PathVariable ID id, @RequestBody T entity) {
-        if (service.findById(id).isPresent()) {
-            return service.save(entity);
+        if (service1.findById(id).isPresent()) {
+            return service1.update(entity,id);
         } else {
-            throw new RuntimeException("Entity not found with id: " + id);
+            throw new RuntimeException("FROM CONTROLLER :Entity not found with id: " + id);
         }
     }
 
+
     @DeleteMapping("/{id}")
     public void delete(@PathVariable ID id) {
-        service.deleteById(id);
+        service1.deleteById(id);
     }
+
 }
 
