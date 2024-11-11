@@ -15,7 +15,7 @@ public class Requirement {
     @Column(nullable = false)
     private String description;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "job_post_id", nullable = false)
     private JobPost jobPost;
 

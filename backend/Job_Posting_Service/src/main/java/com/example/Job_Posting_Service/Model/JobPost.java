@@ -48,7 +48,7 @@ public class JobPost {
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.PERSIST)
     private List<Requirement> requirements = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "job_post_category",
             joinColumns = @JoinColumn(name = "job_post_id"),
