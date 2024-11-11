@@ -1,0 +1,45 @@
+.table {
+  --mdb-table-font-size: 0.9rem;
+  --mdb-table-divider-color: rgba(0, 0, 0, 0.1);
+  font-size: var(--mdb-table-font-size);
+  background-color: var(--secondary--color-1);
+  padding: 10px !important;
+  border-radius: 10px;
+  color: var(--theme-color-3) !important;
+  text-align: center;
+  caption-side: bottom;
+  border-collapse: collapse !important;
+}
+.table > thead {
+  font-size: 16px !important;
+}
+
+.table > tbody {
+  font-size: 14px !important;
+}
+thead,
+tbody,
+tfoot,
+tr,
+td,
+th {
+  color: var(--theme-color-3) !important;
+  border-color: inherit;
+  border-style: solid;
+  border-width: 0;
+  border-block-color: var(--theme-color-1) !important;
+}
+
+.top-req thead,
+tbody,
+tfoot,
+tr,
+td,
+th {
+  font-size: 12px !important;
+  color: var(--theme-color-3) !important;
+  border-color: inherit;
+  border-style: solid;
+  border-width: 0;
+  border-block-color: var(--color-3) !important;
+}
