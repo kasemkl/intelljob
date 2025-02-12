@@ -4,7 +4,7 @@ import dayjs from "dayjs";
 import { useContext } from "react";
 import { AuthContext } from "../contexts/AuthContext";
 
-const baseURL = "http://127.0.0.1:8000";
+const baseURL = "http://localhost:8000";
 
 interface AxiosError {
   response?: {

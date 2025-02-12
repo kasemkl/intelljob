@@ -20,16 +20,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$$m(t%y3dd5i)#uu--(d$kf9f)vz-3ck9ku3g#zst7v6^0qsyx'
+SECRET_KEY = 'django-insecure-#z6n0_zv*#dkjj36z0$*-cbji9o6w4wwbw^@(&2ea%594$4zw_'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+CORS_ALLOW_ALL_ORIGINS=True
 
-ALLOWED_HOSTS = []
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost',
+    'http://127.0.0.1',
+    'http://0.0.0.0',
+    "http://localhost:3000",
+]
+# Application definition
 
 # Example URLs
-JOB_POSTING_SERVICE_URL = "http://job_posting_service:8000"
-USER_MANAGEMENT_SERVICE_URL = "http://user_management_service:8000"
+JOB_POSTING_SERVICE_URL = "http://localhost:8080"
+USER_MANAGEMENT_SERVICE_URL = "http://localhost:8000/api/users-management"
 
 
 # Application definition
@@ -41,7 +48,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-       'applications',
+    'applications',
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
@@ -49,6 +56,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -132,7 +140,17 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [],
 }
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
+
+# Cache timeouts
+APPLICATION_CACHE_TTL = 300  # 5 minutes
+JOB_DETAILS_CACHE_TTL = 300  # 5 minutes

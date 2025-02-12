@@ -15,29 +15,39 @@ export interface City {
 
 class LocationService {
   async getAllCountries(): Promise<Country[]> {
-    const response = await locationApi.get("/locations/countries/");
+    const response = await locationApi.get("/countries");
     return response.data;
   }
 
   async getCountry(id: number): Promise<Country> {
-    const response = await locationApi.get(`/locations/countries/${id}/`);
+    const response = await locationApi.get(`/countries/${id}`);
     return response.data;
   }
 
   async getAllCities(): Promise<City[]> {
-    const response = await locationApi.get("/locations/cities/");
+    const response = await locationApi.get("/cities");
     return response.data;
   }
 
   async getCitiesByCountry(countryId: number): Promise<City[]> {
-    const response = await locationApi.get(
-      `/locations/cities/?country=${countryId}`
-    );
+    const response = await locationApi.get(`/cities`, {
+      params: { country: countryId },
+    });
     return response.data;
   }
 
   async getCity(id: number): Promise<City> {
-    const response = await locationApi.get(`/locations/cities/${id}/`);
+    const response = await locationApi.get(`/cities/${id}`);
+    return response.data;
+  }
+
+  async createCountry(country: Omit<Country, "id">): Promise<Country> {
+    const response = await locationApi.post("/countries", country);
+    return response.data;
+  }
+
+  async createCity(city: Omit<City, "id">): Promise<City> {
+    const response = await locationApi.post("/cities", city);
     return response.data;
   }
 }

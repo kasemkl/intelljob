@@ -5,7 +5,7 @@ import { ThemeProvider } from "styled-components";
 import theme from "./theme/theme.ts";
 import "mdb-react-ui-kit/dist/css/mdb.min.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-
+import "../src/styles/mdb.css";
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider theme={theme}>
