@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   MDBCard,
   MDBCardBody,
@@ -8,54 +8,86 @@ import {
   MDBInput,
   MDBTextArea,
 } from "mdb-react-ui-kit";
-import { Skill, Experience, Education } from "../types/jobseeker";
+import {
+  JobSeekerProfile as JobSeekerProfileType,
+  Skill,
+  Experience,
+  Education,
+} from "../types/jobseeker";
 
 interface ProfessionalInfoProps {
-  skills: Skill[];
-  experience: Experience[];
-  education: Education[];
+  profile: JobSeekerProfileType;
+  setProfile: React.Dispatch<React.SetStateAction<JobSeekerProfileType | null>>;
   isEditing: boolean;
-  newSkill?: Skill;
-  newExperience?: Experience;
-  newEducation?: Education;
-  onAddSkill: () => void;
-  onRemoveSkill: (index: number) => void;
-  onAddExperience: () => void;
-  onRemoveExperience: (index: number) => void;
-  onAddEducation: () => void;
-  onRemoveEducation: (index: number) => void;
-  onSkillChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onExperienceChange?: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => void;
-  onEducationChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({
-  skills,
-  experience,
-  education,
+  profile,
+  setProfile,
   isEditing,
-  newSkill,
-  newExperience,
-  newEducation,
-  onAddSkill,
-  onRemoveSkill,
-  onAddExperience,
-  onRemoveExperience,
-  onAddEducation,
-  onRemoveEducation,
-  onSkillChange,
-  onExperienceChange,
-  onEducationChange,
 }) => {
+  const [newSkill, setNewSkill] = useState<Skill>({ name: "", level: 0 });
+  const [newExperience, setNewExperience] = useState<Experience>({
+    position: "",
+    company: "",
+    years: 0,
+    start_date: "",
+    end_date: "",
+    description: "",
+  });
+  const [newEducation, setNewEducation] = useState<Education>({
+    institution: "",
+    degree: "",
+    start_date: "",
+    end_date: "",
+  });
+
+  const handleAddSkill = () => {
+    if (!newSkill.name || newSkill.level < 1 || newSkill.level > 5) return;
+    setProfile((prev) => ({
+      ...prev!,
+      skills: [...(prev?.skills || []), newSkill],
+    }));
+    setNewSkill({ name: "", level: 0 });
+  };
+
+  const handleRemoveSkill = (index: number) => {
+    setProfile((prev) => ({
+      ...prev!,
+      skills: prev!.skills.filter((_, i) => i !== index),
+    }));
+  };
+
+  const handleAddExperience = () => {
+    if (!newExperience.position || !newExperience.company) return;
+    setProfile((prev) => ({
+      ...prev!,
+      experience: [...(prev?.experience || []), newExperience],
+    }));
+    setNewExperience({
+      position: "",
+      company: "",
+      years: 0,
+      start_date: "",
+      end_date: "",
+      description: "",
+    });
+  };
+
+  const handleRemoveExperience = (index: number) => {
+    setProfile((prev) => ({
+      ...prev!,
+      experience: prev!.experience.filter((_, i) => i !== index),
+    }));
+  };
+
   return (
     <div className="mt-4">
       {/* Skills Section */}
       <MDBCard className="mb-4">
         <MDBCardBody>
           <h5>Skills</h5>
-          {skills.map((skill, index) => (
+          {profile?.skills?.map((skill, index) => (
             <div key={index} className="d-flex align-items-center mb-2">
               <span>
                 {skill.name} - Level: {skill.level}
@@ -65,13 +97,14 @@ const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({
                   color="danger"
                   size="sm"
                   className="ms-2"
-                  onClick={() => onRemoveSkill(index)}
+                  onClick={() => handleRemoveSkill(index)}
                 >
                   Remove
                 </MDBBtn>
               )}
             </div>
           ))}
+          {/* Add skill form */}
           {isEditing && (
             <MDBRow className="mt-3">
               <MDBCol size="5">
@@ -103,7 +136,7 @@ const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({
       <MDBCard className="mb-4">
         <MDBCardBody>
           <h5>Experience</h5>
-          {experience.map((exp, index) => (
+          {profile?.experience?.map((exp, index) => (
             <div key={index} className="mb-3">
               <h6>
                 {exp.position} at {exp.company}
@@ -117,7 +150,7 @@ const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({
                 <MDBBtn
                   color="danger"
                   size="sm"
-                  onClick={() => onRemoveExperience(index)}
+                  onClick={() => handleRemoveExperience(index)}
                 >
                   Remove
                 </MDBBtn>
@@ -174,7 +207,7 @@ const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({
                 />
               </MDBCol>
               <MDBCol size="12">
-                <MDBBtn onClick={onAddExperience}>Add Experience</MDBBtn>
+                <MDBBtn onClick={handleAddExperience}>Add Experience</MDBBtn>
               </MDBCol>
             </MDBRow>
           )}
@@ -185,7 +218,7 @@ const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({
       <MDBCard>
         <MDBCardBody>
           <h5>Education</h5>
-          {education.map((edu, index) => (
+          {profile?.education?.map((edu, index) => (
             <div key={index} className="mb-3">
               <h6>
                 {edu.degree} from {edu.institution}
@@ -197,7 +230,7 @@ const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({
                 <MDBBtn
                   color="danger"
                   size="sm"
-                  onClick={() => onRemoveEducation(index)}
+                  onClick={() => handleRemoveEducation(index)}
                 >
                   Remove
                 </MDBBtn>
@@ -245,7 +278,7 @@ const ProfessionalInfo: React.FC<ProfessionalInfoProps> = ({
                 />
               </MDBCol>
               <MDBCol size="12">
-                <MDBBtn onClick={onAddEducation}>Add Education</MDBBtn>
+                <MDBBtn onClick={handleAddEducation}>Add Education</MDBBtn>
               </MDBCol>
             </MDBRow>
           )}

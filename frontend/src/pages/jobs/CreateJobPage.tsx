@@ -1,43 +1,57 @@
 import React, { useState, useEffect } from "react";
-
 import { useNavigate } from "react-router-dom";
-
-import { jobService } from "../../services/jobService";
-
+import {
+  MDBContainer,
+  MDBCard,
+  MDBCardBody,
+  MDBInput,
+  MDBBtn,
+  MDBListGroup,
+  MDBListGroupItem,
+  MDBIcon,
+  MDBRow,
+  MDBCol,
+  MDBSpinner,
+  MDBCheckbox,
+} from "mdb-react-ui-kit";
+import { jobService, JobData, JobRequirement } from "../../services/jobService";
 import { toast } from "react-toastify";
-
 import locationService, { City } from "../../services/locationService";
-
 import useAxios from "../../hooks/useAxios";
-
 import { useAuth } from "../../contexts/AuthContext";
+import categoryService, { Category } from "../../services/categoryService";
+
+interface FormData {
+  title: string;
+  description: string;
+  salaryRange: string;
+  companyId: string;
+  locationId: string;
+  status: string;
+  categories: Category[];
+}
 
 const CreateJobPage: React.FC = () => {
   const navigate = useNavigate();
-
   const api = useAxios();
-
   const { user } = useAuth();
 
-  console.log(user);
-
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: "",
-
     description: "",
-
-    requirements: "",
-
-    salary: "",
-
-    company_id: "",
-
-    location_id: "",
+    salaryRange: "",
+    companyId: "",
+    locationId: "",
+    status: "ACTIVE",
+    categories: [],
   });
 
+  const [requirements, setRequirements] = useState<string[]>([]);
+  const [requirementInput, setRequirementInput] = useState<string>("");
   const [cities, setCities] = useState<City[]>([]);
-
   const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -45,32 +59,24 @@ const CreateJobPage: React.FC = () => {
     const fetchInitialData = async () => {
       try {
         setLoading(true);
-
         const citiesData = await locationService.getAllCities();
-
         if (isMounted) {
           setCities(citiesData);
         }
-
         if (user?.user_id && isMounted) {
           const response = await api.get(
-            `/api/users-management/companies/${user.user_id}/`
+            `/api/users-management/companiesByUserId/${user.user_id}/`
           );
-
           if (isMounted) {
             setFormData((prev) => ({
               ...prev,
-
-              company_id: response.data.id.toString(),
+              companyId: response.data.id.toString(),
             }));
           }
         }
       } catch (error) {
         console.error("Error fetching initial data:", error);
-
-        if (isMounted) {
-          toast.error("Failed to load necessary data");
-        }
+        toast.error("Failed to load necessary data");
       } finally {
         if (isMounted) {
           setLoading(false);
@@ -88,59 +94,127 @@ const CreateJobPage: React.FC = () => {
   useEffect(() => {
     if (!loading && (!user || user.role !== "company")) {
       toast.error("Please log in as a company to post jobs");
-
       navigate("/login");
     }
   }, [user, loading, navigate]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      if (!formData.company_id) {
-        toast.error("Please log in as a company to post jobs");
-
-        return;
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await categoryService.getAllCategories();
+        setCategories(response);
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+        toast.error("Failed to load categories");
       }
+    };
 
-      const jobData = {
-        ...formData,
+    fetchCategories();
+  }, []);
 
-        company_id: parseInt(formData.company_id),
-
-        location_id: parseInt(formData.location_id),
-
-        salary: parseFloat(formData.salary),
-      };
-
-      console.log("Submitting job data:", jobData);
-
-      await jobService.createJob(jobData);
-
-      toast.success("Job posted successfully!");
-
-      navigate("/jobs");
-    } catch (error) {
-      console.error("Error creating job:", error);
-
-      toast.error("Failed to create job");
+  const handleAddRequirement = () => {
+    if (requirementInput.trim()) {
+      setRequirements([...requirements, requirementInput]);
+      setRequirementInput("");
     }
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
+  const handleRemoveRequirement = (index: number) => {
+    setRequirements(requirements.filter((_, i) => i !== index));
+  };
+
+  const handleCategoryChange = (categoryId: number) => {
+    setSelectedCategories((prev) =>
+      prev.includes(categoryId)
+        ? prev.filter((id) => id !== categoryId)
+        : [...prev, categoryId]
+    );
+  };
+
+  const validateForm = (): boolean => {
+    if (!formData.title.trim()) {
+      toast.error("Job title is required");
+      return false;
+    }
+    if (!formData.description.trim()) {
+      toast.error("Job description is required");
+      return false;
+    }
+    if (!formData.locationId) {
+      toast.error("Location is required");
+      return false;
+    }
+    if (!formData.salaryRange.trim()) {
+      toast.error("Salary range is required");
+      return false;
+    }
+    if (requirements.length === 0) {
+      toast.error("At least one requirement is needed");
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      setLoading(true);
+      if (!formData.companyId) {
+        toast.error("Please log in as a company to post jobs");
+        return;
+      }
+
+      const requirementsList: JobRequirement[] = requirements.map((req) => ({
+        description: req,
+      }));
+
+      const currentDate = new Date().toISOString();
+      const postDate = currentDate.split("T")[0];
+
+      const jobData: JobData = {
+        id: 0,
+        companyId: parseInt(formData.companyId),
+        description: formData.description,
+        locationId: parseInt(formData.locationId),
+        status: formData.status,
+        salaryRange: formData.salaryRange,
+        createdAt: currentDate,
+        updatedAt: currentDate,
+        title: formData.title,
+        postDate: postDate,
+        requirements: requirementsList,
+        categories: selectedCategories.map((id) => ({ id })),
+      };
+
+      await jobService.createJob(jobData);
+      toast.success("Job posted successfully!");
+      navigate("/jobs");
+    } catch (error) {
+      console.error("Error creating job:", error);
+      toast.error(error.response?.data?.message || "Failed to create job");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-
       [e.target.name]: e.target.value,
     });
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <MDBContainer className="text-center py-5">
+        <MDBSpinner role="status" />
+      </MDBContainer>
+    );
   }
 
   if (!user || user.role !== "company") {
@@ -148,84 +222,45 @@ const CreateJobPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">
-            Post New Job
-          </h1>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Job Title
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Description
-              </label>
-              <textarea
-                name="description"
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Requirements
-              </label>
-              <textarea
-                name="requirements"
-                value={formData.requirements}
-                onChange={handleChange}
-                rows={4}
-                className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Salary
-                </label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span className="text-gray-500 sm:text-sm">$</span>
-                  </div>
-                  <input
-                    type="number"
-                    name="salary"
-                    value={formData.salary}
-                    onChange={handleChange}
-                    className="appearance-none block w-full pl-7 px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Location
-                </label>
-                <select
-                  name="location_id"
-                  value={formData.location_id}
+    <MDBContainer className="py-5">
+      <MDBCard>
+        <MDBCardBody>
+          <h1 className="text-center mb-4">Post New Job</h1>
+          <form onSubmit={handleSubmit}>
+            <MDBInput
+              label="Job Title"
+              name="title"
+              value={formData.title}
+              onChange={handleChange}
+              required
+              className="mb-4"
+            />
+            <MDBInput
+              label="Description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              type="textarea"
+              rows={4}
+              required
+              className="mb-4"
+            />
+            <MDBRow className="mb-4">
+              <MDBCol md="6">
+                <MDBInput
+                  label="Salary Range"
+                  name="salaryRange"
+                  value={formData.salaryRange}
                   onChange={handleChange}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  required
+                />
+              </MDBCol>
+              <MDBCol md="6">
+                <select
+                  name="locationId"
+                  value={formData.locationId}
+                  onChange={handleChange}
+                  className="form-select"
                   required
                 >
                   <option value="">Select a location</option>
@@ -235,28 +270,77 @@ const CreateJobPage: React.FC = () => {
                     </option>
                   ))}
                 </select>
+              </MDBCol>
+            </MDBRow>
+            <div className="mb-4">
+              <label>Requirements</label>
+              <MDBRow>
+                <MDBCol md="10">
+                  <MDBInput
+                    label="Add a requirement"
+                    value={requirementInput}
+                    onChange={(e) => setRequirementInput(e.target.value)}
+                  />
+                </MDBCol>
+                <MDBCol md="2">
+                  <MDBBtn
+                    type="button"
+                    color="primary"
+                    onClick={handleAddRequirement}
+                  >
+                    Add
+                  </MDBBtn>
+                </MDBCol>
+              </MDBRow>
+              <MDBListGroup className="mt-3">
+                {requirements.map((req, index) => (
+                  <MDBListGroupItem
+                    key={index}
+                    className="d-flex justify-content-between align-items-center"
+                  >
+                    {req}
+                    <MDBIcon
+                      fas
+                      icon="trash-alt"
+                      className="text-danger"
+                      onClick={() => handleRemoveRequirement(index)}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </MDBListGroupItem>
+                ))}
+              </MDBListGroup>
+            </div>
+            <div className="mb-4">
+              <label>Categories</label>
+              <div className="d-flex flex-wrap">
+                {categories.map((category) => (
+                  <MDBCheckbox
+                    key={category.id}
+                    label={category.name}
+                    checked={selectedCategories.includes(category.id)}
+                    onChange={() => handleCategoryChange(category.id)}
+                    className="me-3"
+                  />
+                ))}
               </div>
             </div>
-
-            <div className="flex justify-end pt-6">
-              <button
+            <div className="text-end">
+              <MDBBtn
                 type="button"
+                color="light"
                 onClick={() => navigate("/jobs")}
-                className="mr-4 inline-flex justify-center py-2 px-4 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="me-2"
               >
                 Cancel
-              </button>
-              <button
-                type="submit"
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
+              </MDBBtn>
+              <MDBBtn type="submit" color="primary">
                 Post Job
-              </button>
+              </MDBBtn>
             </div>
           </form>
-        </div>
-      </div>
-    </div>
+        </MDBCardBody>
+      </MDBCard>
+    </MDBContainer>
   );
 };
 

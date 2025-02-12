@@ -30,10 +30,44 @@ export interface Education {
   end_date: string;
 }
 
+export interface CVParseResponse {
+  name: string | null;
+  email: string | null;
+  location: string | null;
+  linkedIn_Link: string | null;
+  university: string[];
+  skills: string[];
+  degree: string[];
+  language: string[];
+  certification: string[];
+  worked_as: string[];
+  year_of_experience: string[];
+  year_of_graduation: string[];
+  awards: string[];
+  companies_work_at: string[];
+}
+
 export interface JobSeekerProfile {
   user: number;
   profile_id: string;
   skills: Skill[];
   experience: Experience[];
   education: Education[];
+  linkedin_url?: string;
+  languages: Language[];
+  certifications: Certification[];
+  awards: string[];
+  companies_worked_at: string[];
+}
+
+export interface Language {
+  id?: number;
+  name: string;
+  proficiency: string;
+}
+
+export interface Certification {
+  id?: number;
+  name: string;
+  date_obtained?: string;
 }

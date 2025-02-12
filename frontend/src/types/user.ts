@@ -8,4 +8,5 @@ export interface User {
   role: "jobSeeker" | "company" | "admin"; // User roles
   createdAt: string; // Date of account creation
   updatedAt: string; // Date of last update
+  profile_id: number; // Profile ID based on role
 }

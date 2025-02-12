@@ -2,10 +2,11 @@
   position: absolute;
   top: 62px;
   width: 100%;
+  background-color: var(--background-primary);
 }
 
 .error {
-  color: rgb(232, 60, 60) !important;
+  color: var(--status-error) !important;
   text-shadow: none !important;
   margin: 5px 0 0 5px;
 }
@@ -22,10 +23,12 @@
   align-items: center;
   display: flex;
 }
+
 .modal-content {
   font-size: 18px !important;
   height: 18rem;
 }
+
 .modal-btn {
   height: 30px !important;
   font-size: 12px !important;
@@ -36,5 +39,60 @@
   justify-content: center;
   align-items: center;
   height: 75vh;
-  /* font-size: 40px; */
+}
+
+.job-card {
+  background-color: var(--background-secondary) !important;
+  border: 1px solid var(--border-light) !important;
+}
+
+.job-card .card-title {
+  color: var(--text-primary) !important;
+}
+
+.job-card .text-muted {
+  color: var(--text-muted) !important;
+}
+
+.filters-card {
+  background-color: var(--background-secondary) !important;
+  border: 1px solid var(--border-light) !important;
+}
+
+.form-select,
+.form-control {
+  background-color: var(--form-background) !important;
+  border: 1px solid var(--form-border) !important;
+  color: var(--text-primary) !important;
+}
+
+.form-select:focus,
+.form-control:focus {
+  border-color: var(--form-focus) !important;
+  box-shadow: 0 0 0 0.25rem var(--shadow-sm) !important;
+}
+
+.badge {
+  background-color: var(--status-success) !important;
+  color: #fff !important;
+  font-weight: 500 !important;
+}
+
+.btn-primary {
+  background-color: var(--button-primary) !important;
+  border-color: var(--button-primary) !important;
+  color: var(--button-text) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--button-hover) !important;
+  border-color: var(--button-hover) !important;
+}
+
+.btn-link {
+  color: var(--text-accent) !important;
+}
+
+.btn-link:hover {
+  color: var(--text-hover) !important;
 }

@@ -2,28 +2,42 @@
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+  background-color: var(--background-primary);
 }
 
 .profile-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e0e0e0;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.profile-photo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+}
+
+.profile-photo {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
 }
 
 .profile-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
+  flex-grow: 1;
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
 }
 
 .section-card {
-  background: #fff;
+  background: var(--background-secondary);
   border: none;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--shadow-md);
   border-radius: 10px;
   margin-bottom: 1.5rem;
 }
@@ -31,16 +45,15 @@
 .section-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
   margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-/* Skills Section */
 .skills-container {
   display: flex;
   flex-wrap: wrap;
@@ -49,8 +62,8 @@
 }
 
 .skill-item {
-  background: #f8f9fa;
-  border: 1px solid #e0e0e0;
+  background: var(--background-hover);
+  border: 1px solid var(--border-light);
   border-radius: 20px;
   padding: 0.5rem 1rem;
   display: flex;
@@ -60,11 +73,12 @@
 
 .skill-name {
   font-weight: 500;
+  color: var(--text-primary);
 }
 
 .skill-level {
-  background: #3b71ca;
-  color: white;
+  background: var(--accent-primary);
+  color: var(--border-light);
   border-radius: 12px;
   padding: 0.2rem 0.5rem;
   font-size: 0.8rem;
@@ -72,16 +86,15 @@
 
 .skill-remove {
   cursor: pointer;
-  color: #dc3545;
+  color: var(--status-error);
   margin-left: 0.5rem;
 }
 
-/* Experience Section */
 .experience-item {
   padding: 1rem;
-  border-left: 3px solid #3b71ca;
+  border-left: 3px solid var(--accent-primary);
   margin-bottom: 1rem;
-  background: #f8f9fa;
+  background: var(--background-secondary);
   border-radius: 0 8px 8px 0;
 }
 
@@ -94,33 +107,32 @@
 
 .experience-title {
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
   font-size: 1.1rem;
 }
 
 .experience-company {
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
 .experience-dates {
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.85rem;
   font-style: italic;
 }
 
 .experience-description {
-  color: #4a4a4a;
+  color: var(--text-secondary);
   font-size: 0.95rem;
   margin-top: 0.5rem;
 }
 
-/* Education Section */
 .education-item {
   padding: 1rem;
-  border-left: 3px solid #28a745;
+  border-left: 3px solid var(--status-success);
   margin-bottom: 1rem;
-  background: #f8f9fa;
+  background: var(--background-secondary);
   border-radius: 0 8px 8px 0;
 }
 
@@ -132,18 +144,17 @@
 
 .education-degree {
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
   font-size: 1.1rem;
 }
 
 .education-institution {
-  color: #666;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
-/* Form Controls */
 .form-control-custom {
-  border: 1px solid #ced4da;
+  border: 1px solid var(--border-light);
   border-radius: 6px;
   padding: 0.5rem;
   width: 100%;
@@ -151,15 +162,14 @@
 }
 
 .form-control-custom:focus {
-  border-color: #3b71ca;
-  box-shadow: 0 0 0 0.2rem rgba(59, 113, 202, 0.25);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 0.2rem var(--shadow-md);
   outline: none;
 }
 
-/* Action Buttons */
 .action-buttons {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
 }
 
 .btn-custom {
@@ -170,31 +180,6 @@
   border-radius: 6px;
   font-weight: 500;
   transition: all 0.3s ease;
-}
-
-/* Dark Mode */
-[data-theme="dark"] .section-card {
-  background: #1a1a1a;
-}
-
-[data-theme="dark"] .section-title {
-  color: #e0e0e0;
-  border-bottom-color: #404040;
-}
-
-[data-theme="dark"] .skill-item {
-  background: #2b2b2b;
-  border-color: #404040;
-}
-
-[data-theme="dark"] .experience-item,
-[data-theme="dark"] .education-item {
-  background: #2b2b2b;
-}
-
-[data-theme="dark"] .experience-title,
-[data-theme="dark"] .education-degree {
-  color: #e0e0e0;
 }
 
 /* Responsive Design */
@@ -222,36 +207,64 @@
 .add-form {
   margin-top: 1rem;
   padding: 1rem;
-  background: #f8f9fa;
+  background: var(--background-secondary);
   border-radius: 8px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-light);
 }
 
 .form-control {
-  border: 1px solid #ced4da;
-  border-radius: 4px;
+  border: 1px solid var(--border-light) !important;
+  border-radius: 4px !important;
   padding: 0.375rem 0.75rem;
 }
 
 .form-control:focus {
-  border-color: #3b71ca;
-  box-shadow: 0 0 0 0.2rem rgba(59, 113, 202, 0.25);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 0.2rem var(--shadow-md);
 }
 
+.form-label {
+  color: var(--text-primary) !important;
+}
 /* Dark mode support */
 [data-theme="dark"] .add-form {
-  background: #2b2b2b;
-  border-color: #404040;
+  background: var(--background-hover) !important;
+  border-color: var(--border-dark) !important;
 }
 
 [data-theme="dark"] .form-control {
-  background-color: #1a1a1a;
-  border-color: #404040;
-  color: #fff;
+  background-color: var(--background-secondary) !important;
+  border-color: var(--border-dark) !important;
+  color: var(--text-primary) !important;
 }
 
 [data-theme="dark"] .form-control:focus {
-  background-color: #1a1a1a;
-  border-color: #3b71ca;
-  color: #fff;
+  background-color: var(--background-secondary) !important;
+  border-color: var(--accent-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+.skill-level-input {
+  width: 60px;
+  margin-left: 10px;
+  background: var(--background-secondary);
+  border: 1px solid var(--border-light);
+  border-radius: 5px;
+  padding: 5px;
+  color: var(--text-primary);
+  font-weight: bold;
+  text-align: center;
+  -moz-appearance: textfield; /* Remove spinner in Firefox */
+}
+
+.skill-level-input::-webkit-outer-spin-button,
+.skill-level-input::-webkit-inner-spin-button {
+  -webkit-appearance: none; /* Remove spinner in Chrome */
+  margin: 0;
+}
+
+.skill-level-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 0.2rem var(--shadow-md);
+  outline: none;
 }

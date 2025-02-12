@@ -9,6 +9,7 @@ import {
   MDBInput,
   MDBTextArea,
   MDBSpinner,
+  MDBFile,
 } from "mdb-react-ui-kit";
 
 import {
@@ -16,6 +17,8 @@ import {
   Skill,
   Experience,
   Education,
+  Language,
+  Certification,
 } from "../types/jobseeker";
 
 import { toast } from "react-toastify";
@@ -23,21 +26,23 @@ import useAxios from "../hooks/useAxios";
 import PersonalInfo from "../components/PersonalInfo";
 import ProfessionalInfo from "../components/ProfessionalInfo";
 import "../styles/jobseeker-profile.css";
+import CVUpload from "../components/CVUpload";
 
 interface JobSeekerProfileProps {
   userId: number;
 }
 
+interface UserDetails {
+  first_name: string;
+  last_name: string;
+  email: string;
+  profile_picture?: File | null;
+}
+
 const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
   const [profile, setProfile] = useState<JobSeekerProfileType | null>(null);
 
-  const [userDetails, setUserDetails] = useState<{
-    first_name: string;
-
-    last_name: string;
-
-    email: string;
-  } | null>(null);
+  const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -65,6 +70,16 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
     start_date: "",
     end_date: "",
   });
+
+  const [newLanguage, setNewLanguage] = useState<Language>({
+    name: "",
+    proficiency: "",
+  });
+  const [newCertification, setNewCertification] = useState<Certification>({
+    name: "",
+    date_obtained: "",
+  });
+  const [newAward, setNewAward] = useState("");
 
   useEffect(() => {
     fetchProfile();
@@ -156,6 +171,24 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
     });
   };
 
+  const handleSkillLevelChange = (index: number, level: number) => {
+    if (!profile) return;
+
+    if (level < 1 || level > 5) {
+      toast.error("Skill level must be between 1 and 5");
+      return;
+    }
+
+    const updatedSkills = profile.skills.map((skill, i) =>
+      i === index ? { ...skill, level } : skill
+    );
+
+    setProfile({
+      ...profile,
+      skills: updatedSkills,
+    });
+  };
+
   const handleAddExperience = () => {
     if (!profile) return;
 
@@ -199,18 +232,39 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setUserDetails((prev) => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          profile_picture: file,
+        };
+      });
+    }
+  };
+
   const handleSave = async () => {
     try {
       setLoading(true);
 
+      const formData = new FormData();
       if (userDetails) {
-        await api.put(`/api/users-management/users/${userId}/`, {
-          ...userDetails,
-          role: "job_seeker",
-        });
+        formData.append("first_name", userDetails.first_name);
+        formData.append("last_name", userDetails.last_name);
+        formData.append("email", userDetails.email);
+        formData.append("role", "job_seeker");
+        if (userDetails.profile_picture) {
+          formData.append("profile_picture", userDetails.profile_picture);
+        }
       }
 
       if (profile) {
+        const linkedinUrl = profile.linkedin_url?.startsWith("http")
+          ? profile.linkedin_url
+          : `https://${profile.linkedin_url}`;
+
         const profileData = {
           user: userId,
           profile_id: profile.profile_id,
@@ -227,6 +281,17 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
             description: exp.description,
           })),
           education: profile.education,
+          linkedin_url: linkedinUrl,
+          languages: profile.languages?.map((lang) => ({
+            name: lang.name,
+            proficiency: lang.proficiency,
+          })),
+          certifications: profile.certifications?.map((cert) => ({
+            name: cert.name,
+            date_obtained: cert.date_obtained,
+          })),
+          awards: profile.awards || [],
+          companies_worked_at: profile.companies_worked_at || [],
         };
 
         await api.put(
@@ -239,7 +304,7 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
       setIsEditing(false);
       await fetchProfile();
       await fetchUserDetails();
-    } catch (error) {
+    } catch (error: any) {
       toast.error("Error updating profile");
       console.error("Error updating job seeker profile:", error);
     } finally {
@@ -284,6 +349,61 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
     });
   };
 
+  const handleAddLanguage = () => {
+    if (!profile || !newLanguage.name || !newLanguage.proficiency) return;
+    setProfile({
+      ...profile,
+      languages: [...(profile.languages || []), newLanguage],
+    });
+    setNewLanguage({ name: "", proficiency: "" });
+  };
+
+  const handleRemoveLanguage = (index: number) => {
+    if (!profile?.languages) return;
+    const updatedLanguages = [...profile.languages];
+    updatedLanguages.splice(index, 1);
+    setProfile({ ...profile, languages: updatedLanguages });
+  };
+
+  const handleAddCertification = () => {
+    if (!profile || !newCertification.name) return;
+    setProfile({
+      ...profile,
+      certifications: [...(profile.certifications || []), newCertification],
+    });
+    setNewCertification({ name: "", date_obtained: "" });
+  };
+
+  const handleRemoveCertification = (index: number) => {
+    if (!profile?.certifications) return;
+    const updatedCertifications = [...profile.certifications];
+    updatedCertifications.splice(index, 1);
+    setProfile({ ...profile, certifications: updatedCertifications });
+  };
+
+  const handleAddAward = () => {
+    if (!profile || !newAward) return;
+    setProfile({
+      ...profile,
+      awards: [...(profile.awards || []), newAward],
+    });
+    setNewAward("");
+  };
+
+  const handleRemoveAward = (index: number) => {
+    if (!profile?.awards) return;
+    const updatedAwards = [...profile.awards];
+    updatedAwards.splice(index, 1);
+    setProfile({ ...profile, awards: updatedAwards });
+  };
+
+  const handleRemoveCompany = (index: number) => {
+    if (!profile?.companies_worked_at) return;
+    const updatedCompanies = [...profile.companies_worked_at];
+    updatedCompanies.splice(index, 1);
+    setProfile({ ...profile, companies_worked_at: updatedCompanies });
+  };
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center">
@@ -299,6 +419,20 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
   return (
     <div className="jobseeker-profile">
       <div className="profile-header">
+        <div className="profile-photo-container">
+          {isEditing ? (
+            <MDBFile
+              label="Choose a profile picture"
+              onChange={handleFileChange}
+            />
+          ) : (
+            <img
+              src={userDetails?.profile_picture || "/default-profile.png"}
+              alt="Profile"
+              className="profile-photo"
+            />
+          )}
+        </div>
         <h4 className="profile-title">Job Seeker Profile</h4>
         <div className="action-buttons">
           <MDBBtn
@@ -324,6 +458,19 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
         onInputChange={handleInputChange}
       />
 
+      <MDBCard className="section-card">
+        <MDBCardBody>
+          <h5 className="section-title">
+            <i className="fas fa-file-pdf"></i>
+            CV Upload
+          </h5>
+          <p className="text-muted mb-3">
+            Upload your CV to automatically update your profile information
+          </p>
+          <CVUpload onUploadSuccess={fetchProfile} />
+        </MDBCardBody>
+      </MDBCard>
+
       {/* Skills Section */}
       <MDBCard className="section-card">
         <MDBCardBody>
@@ -335,7 +482,20 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
             {profile?.skills.map((skill, index) => (
               <div key={index} className="skill-item">
                 <span className="skill-name">{skill.name}</span>
-                <span className="skill-level">Level {skill.level}</span>
+                {isEditing ? (
+                  <input
+                    type="number"
+                    min="1"
+                    max="5"
+                    value={skill.level}
+                    onChange={(e) =>
+                      handleSkillLevelChange(index, parseInt(e.target.value))
+                    }
+                    className="skill-level-input"
+                  />
+                ) : (
+                  <span className="skill-level">Level {skill.level}</span>
+                )}
                 {isEditing && (
                   <i
                     className="fas fa-times skill-remove"
@@ -362,8 +522,6 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
                 <MDBCol md="4">
                   <input
                     type="number"
-                    className="form-control mb-2"
-                    placeholder="Level (1-5)"
                     min="1"
                     max="5"
                     value={newSkill.level || ""}
@@ -373,6 +531,7 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
                         level: parseInt(e.target.value),
                       })
                     }
+                    className="skill-level-input"
                   />
                 </MDBCol>
                 <MDBCol md="2">
@@ -594,6 +753,260 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
               </MDBRow>
             </div>
           )}
+        </MDBCardBody>
+      </MDBCard>
+
+      {/* Languages Section */}
+      <MDBCard className="section-card">
+        <MDBCardBody>
+          <h5 className="section-title">
+            <i className="fas fa-language"></i>
+            Languages
+          </h5>
+          <div className="languages-container">
+            {profile?.languages?.map((language, index) => (
+              <div key={index} className="language-item">
+                <div className="language-header">
+                  <div>
+                    <div className="language-name">{language.name}</div>
+                    <div className="language-proficiency">
+                      {language.proficiency}
+                    </div>
+                  </div>
+                </div>
+                {isEditing && (
+                  <MDBBtn
+                    color="danger"
+                    size="sm"
+                    onClick={() => handleRemoveLanguage(index)}
+                    className="mt-2"
+                  >
+                    Remove
+                  </MDBBtn>
+                )}
+              </div>
+            ))}
+          </div>
+          {isEditing && (
+            <div className="add-form">
+              <MDBRow>
+                <MDBCol md="6">
+                  <input
+                    type="text"
+                    className="form-control mb-2"
+                    placeholder="Language"
+                    value={newLanguage.name}
+                    onChange={(e) =>
+                      setNewLanguage({ ...newLanguage, name: e.target.value })
+                    }
+                  />
+                </MDBCol>
+                <MDBCol md="6">
+                  <select
+                    className="form-control mb-2"
+                    value={newLanguage.proficiency}
+                    onChange={(e) =>
+                      setNewLanguage({
+                        ...newLanguage,
+                        proficiency: e.target.value,
+                      })
+                    }
+                  >
+                    <option value="">Select Proficiency</option>
+                    <option value="Native">Native</option>
+                    <option value="Fluent">Fluent</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Basic">Basic</option>
+                  </select>
+                </MDBCol>
+                <MDBCol md="12">
+                  <MDBBtn onClick={handleAddLanguage}>Add Language</MDBBtn>
+                </MDBCol>
+              </MDBRow>
+            </div>
+          )}
+        </MDBCardBody>
+      </MDBCard>
+
+      {/* Certifications Section */}
+      <MDBCard className="section-card">
+        <MDBCardBody>
+          <h5 className="section-title">
+            <i className="fas fa-certificate"></i>
+            Certifications
+          </h5>
+          <div className="certifications-container">
+            {profile?.certifications?.map((cert, index) => (
+              <div key={index} className="certification-item">
+                <div className="certification-header">
+                  <div className="certification-name">{cert.name}</div>
+                  {cert.date_obtained && (
+                    <div className="certification-date">
+                      {cert.date_obtained}
+                    </div>
+                  )}
+                </div>
+                {isEditing && (
+                  <MDBBtn
+                    color="danger"
+                    size="sm"
+                    onClick={() => handleRemoveCertification(index)}
+                    className="mt-2"
+                  >
+                    Remove
+                  </MDBBtn>
+                )}
+              </div>
+            ))}
+          </div>
+          {isEditing && (
+            <div className="add-form">
+              <MDBRow>
+                <MDBCol md="8">
+                  <input
+                    type="text"
+                    className="form-control mb-2"
+                    placeholder="Certification Name"
+                    value={newCertification.name}
+                    onChange={(e) =>
+                      setNewCertification({
+                        ...newCertification,
+                        name: e.target.value,
+                      })
+                    }
+                  />
+                </MDBCol>
+                <MDBCol md="4">
+                  <input
+                    type="date"
+                    className="form-control mb-2"
+                    value={newCertification.date_obtained || ""}
+                    onChange={(e) =>
+                      setNewCertification({
+                        ...newCertification,
+                        date_obtained: e.target.value,
+                      })
+                    }
+                  />
+                </MDBCol>
+                <MDBCol md="12">
+                  <MDBBtn onClick={handleAddCertification}>
+                    Add Certification
+                  </MDBBtn>
+                </MDBCol>
+              </MDBRow>
+            </div>
+          )}
+        </MDBCardBody>
+      </MDBCard>
+
+      {/* Additional Information Section */}
+      <MDBCard className="section-card">
+        <MDBCardBody>
+          <h5 className="section-title">
+            <i className="fas fa-info-circle"></i>
+            Additional Information
+          </h5>
+
+          {/* LinkedIn URL */}
+          <div className="info-item">
+            <div className="info-label">
+              <i className="fab fa-linkedin"></i>
+              LinkedIn Profile
+            </div>
+            {isEditing ? (
+              <input
+                type="url"
+                className="form-control mb-3"
+                placeholder="LinkedIn URL"
+                value={profile?.linkedin_url || ""}
+                onChange={(e) =>
+                  setProfile((prev) =>
+                    prev
+                      ? {
+                          ...prev,
+                          linkedin_url: e.target.value,
+                        }
+                      : null
+                  )
+                }
+              />
+            ) : (
+              <div className="info-value">
+                {profile?.linkedin_url ? (
+                  <a
+                    href={profile.linkedin_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {profile.linkedin_url}
+                  </a>
+                ) : (
+                  <span className="text-muted">Not provided</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Awards */}
+          <div className="info-item">
+            <div className="info-label">
+              <i className="fas fa-trophy"></i>
+              Awards
+            </div>
+            <div className="awards-container">
+              {profile?.awards?.map((award, index) => (
+                <div key={index} className="award-item">
+                  {award}
+                  {isEditing && (
+                    <i
+                      className="fas fa-times remove-icon"
+                      onClick={() => handleRemoveAward(index)}
+                    ></i>
+                  )}
+                </div>
+              ))}
+            </div>
+            {isEditing && (
+              <div className="add-form">
+                <MDBRow>
+                  <MDBCol md="10">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Award"
+                      value={newAward}
+                      onChange={(e) => setNewAward(e.target.value)}
+                    />
+                  </MDBCol>
+                  <MDBCol md="2">
+                    <MDBBtn onClick={handleAddAward}>Add</MDBBtn>
+                  </MDBCol>
+                </MDBRow>
+              </div>
+            )}
+          </div>
+
+          {/* Companies Worked At */}
+          <div className="info-item">
+            <div className="info-label">
+              <i className="fas fa-building"></i>
+              Previous Companies
+            </div>
+            <div className="companies-container">
+              {profile?.companies_worked_at?.map((company, index) => (
+                <div key={index} className="company-item">
+                  {company}
+                  {isEditing && (
+                    <i
+                      className="fas fa-times remove-icon"
+                      onClick={() => handleRemoveCompany(index)}
+                    ></i>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
         </MDBCardBody>
       </MDBCard>
     </div>

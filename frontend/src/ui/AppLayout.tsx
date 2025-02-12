@@ -5,17 +5,23 @@ import "../styles/variables.css";
 import "../styles/main.css";
 
 const StyledAppLayout = styled.div`
-  // display: grid;
-  // grid-template-columns: 26rem 1fr;
-  // grid-template-rows: auto 1fr;
-  height: 100vh;
+  min-height: 100vh;
   position: relative;
 `;
 
 const Main = styled.main`
-  background-color: var(--neutral--800);
+  background-color: var(--background-tertiary);
   padding: 4rem 4.8rem 6.4rem;
-  color: var(--theme-color-3);
+  color: var(--text-primary);
+  // border-left: 1px solid var(--border-light); /* Subtle separator */
+`;
+
+const Container = styled.div`
+  max-width: 120rem;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 3.2rem;
 `;
 
 const AppLayout: React.FC = () => {
@@ -23,7 +29,9 @@ const AppLayout: React.FC = () => {
     <StyledAppLayout>
       <Sidebar />
       <Main className="home-section">
-        <Outlet />
+        <Container>
+          <Outlet />
+        </Container>
       </Main>
     </StyledAppLayout>
   );

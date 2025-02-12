@@ -1,13 +1,16 @@
+@import "./variables.css";
+
 .sign-up fieldset {
   display: flex !important;
   min-width: 400px !important;
   padding: 25px !important;
-  border: 1px solid #ccc !important;
+  border: 1px solid var(--border-light) !important;
   border-radius: 20px !important;
   flex-direction: column !important;
-  background-color: #fff;
-  box-shadow: 0 4px 8px rgb(152 147 159 / 54%);
+  background-color: var(--background-primary);
+  box-shadow: var(--shadow-md);
 }
+
 .sign-up .field {
   position: relative;
   padding-left: 10px;
@@ -26,24 +29,28 @@
   flex-direction: column;
 }
 
-.Form .sign-up .field i {
+.sign-up .field i {
   position: absolute;
   top: 100%;
   transform: translateY(-10%);
-  color: #999;
+  color: var(--text-muted);
   font-size: 18px;
   transition: all 0.2s ease;
   left: 15px;
 }
+
 .sign-up .field input:focus + i {
-  color: #412262; /* Your desired color */
+  color: var(--text-accent);
 }
+
 .sign-up .button {
   margin-top: 20px;
 }
+
 .sign-up fieldset .field .show-hide {
   top: 85% !important;
 }
+
 .sign-up .field label {
   font-size: 12px !important;
 }

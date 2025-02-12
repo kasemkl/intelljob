@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  user_management:
+    image: your_user_management_image
+    ports:
+      - "8001:8001"
+    environment:
+      - SOME_ENV_VAR=some_value
+
+  job_posting:
+    image: your_job_posting_image
+    ports:
+      - "8080:8080"
+    environment:
+      - SOME_ENV_VAR=some_value
+
+  job_applications:
+    image: your_job_applications_image
+    ports:
+      - "8003:8003"
+    environment:
+      - SOME_ENV_VAR=some_value
+
+  location:
+    image: your_location_image
+    ports:
+      - "8002:8002"
+    environment:
+      - SOME_ENV_VAR=some_value

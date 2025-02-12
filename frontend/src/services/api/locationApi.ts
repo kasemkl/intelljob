@@ -1,29 +1,26 @@
-import axios from "axios";
-
-const locationApi = axios.create({
-  baseURL: import.meta.env.VITE_LOCATION_SERVICE_URL || "http://localhost:8002/api",
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
-// Request interceptor for API calls
-locationApi.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("access_token");
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-export default locationApi;
-
-
-
+import axios from "axios";
+
+const locationApi = axios.create({
+  baseURL:
+    import.meta.env.VITE_API_GATEWAY_URL ||
+    "http://localhost:8004/api/locations",
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
+locationApi.interceptors.request.use(
+  (config) => {
+    const authTokens = localStorage.getItem("authTokens");
+    if (authTokens) {
+      const tokens = JSON.parse(authTokens);
+      config.headers.Authorization = `Bearer ${tokens.access}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+export default locationApi;

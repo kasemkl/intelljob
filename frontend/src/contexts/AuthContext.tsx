@@ -27,6 +27,7 @@ interface User {
 
   role: "job_seeker" | "company" | "admin";
   user_id: number;
+  profile_picture?: string;
 }
 
 interface RegisterFormData {
