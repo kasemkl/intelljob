@@ -220,10 +220,10 @@ const ApplicationDetailsPage: React.FC<ApplicationDetailsPageProps> = () => {
                       <MDBCardBody>
                         <h5 className="mb-1">{edu.degree}</h5>
                         <h6 className="mb-2">{edu.institution}</h6>
-                        <p className="text-muted mb-0">
+                        {/* <p className="text-muted mb-0">
                           {new Date(edu.start_date).toLocaleDateString()} -
                           {new Date(edu.end_date).toLocaleDateString()}
-                        </p>
+                        </p> */}
                       </MDBCardBody>
                     </MDBCard>
                   ))}

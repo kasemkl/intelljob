@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'users',
     'corsheaders',
+    'drf_yasg',
+    'notifications'
 ]
 
 MIDDLEWARE = [
@@ -98,8 +100,15 @@ WSGI_APPLICATION = 'user_management_service.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'users_db',  # database name
+        'USER': 'admin1',  #  MySQL username
+        'PASSWORD': 'kasem',  # MySQL password
+        'HOST': 'localhost',  # Use '127.0.0.1' if localhost doesn't work
+        'PORT': '3306',  # Default MySQL port
+        'OPTIONS': {
+            'charset': 'utf8mb4'
+        },
     }
 }
 

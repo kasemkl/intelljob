@@ -353,3 +353,16 @@
     display: none;
   }
 }
+
+
+.notification-badge{
+  width: 27px !important;
+  display: flex
+;
+  justify-content: center;
+  position: absolute;
+  right: -6px;
+  background: red;
+  border-radius: 62px;
+  color: white;
+}

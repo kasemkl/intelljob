@@ -1,0 +1,25 @@
+.quiz-card {
+  background-color: var(--background-primary);
+  padding: 20px;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.question-text {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--text-primary);
+}
+
+.choice-item {
+  margin-bottom: 10px;
+  padding: 10px;
+  background-color: var(--background-secondary);
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.time-left {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}

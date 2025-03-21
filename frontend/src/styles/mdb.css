@@ -18,3 +18,12 @@
   border: 1px solid var(--border-medium) !important;
   box-shadow: none !important;
 }
+
+.form-check-input {
+  position: relative;
+  width: 1.125rem;
+  height: 1.125rem;
+  background-color: #fff;
+  border: 0.125rem solid rgba(0, 0, 0, 0.25);
+  margin: 0 !important;
+}

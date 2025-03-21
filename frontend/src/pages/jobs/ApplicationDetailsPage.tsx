@@ -12,12 +12,17 @@ import {
   MDBTable,
   MDBTableHead,
   MDBTableBody,
+  MDBDropdown,
+  MDBDropdownToggle,
+  MDBDropdownMenu,
+  MDBDropdownItem,
 } from "mdb-react-ui-kit";
 import {
   useApplicationService,
   Application,
 } from "../../services/applicationService";
 import { toast } from "react-toastify";
+import { MDBBtnGroup } from "mdb-react-ui-kit";
 
 interface ApplicationDetailsPageProps {}
 
@@ -25,6 +30,7 @@ const ApplicationDetailsPage: React.FC<ApplicationDetailsPageProps> = () => {
   const { jobId } = useParams<{ jobId: string }>();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortCriteria, setSortCriteria] = useState<string>("matching");
   const applicationService = useApplicationService();
   const navigate = useNavigate();
 
@@ -37,11 +43,10 @@ const ApplicationDetailsPage: React.FC<ApplicationDetailsPageProps> = () => {
       const response = await applicationService.getCompanyApplications(
         Number(jobId)
       );
-      setApplications(
-        Array.isArray(response.data.applications)
-          ? response.data.applications
-          : []
-      );
+      const apps = Array.isArray(response.data.applications)
+        ? response.data.applications
+        : [];
+      setApplications(sortApplications(apps, sortCriteria));
     } catch (error: any) {
       toast.error("Failed to fetch applications");
       console.error("Error fetching applications:", error);
@@ -50,21 +55,66 @@ const ApplicationDetailsPage: React.FC<ApplicationDetailsPageProps> = () => {
     }
   };
 
-  const handleViewDetails = (applicationId: number) => {
-    navigate(`/applications/${applicationId}`);
+  const [activeButton, setActiveButton] = useState<string>("matching");
+
+  const sortApplications = (apps: any[], criteria: string) => {
+    return apps.sort((a, b) => {
+      if (criteria === "matching") {
+        return (b.similarity_score || 0) - (a.similarity_score || 0);
+      } else if (criteria === "quiz_score") {
+        return (b.quiz_score || 0) - (a.quiz_score || 0);
+      } else if (criteria === "combined") {
+        const aCombined = (a.similarity_score || 0) + (a.quiz_score || 0);
+        const bCombined = (b.similarity_score || 0) + (b.quiz_score || 0);
+        return bCombined - aCombined;
+      }
+      return 0;
+    });
   };
 
-  if (loading) {
-    return (
-      <div className="d-flex justify-content-center align-items-center min-vh-100">
-        <MDBSpinner />
-      </div>
-    );
-  }
+  const handleSortByMatching = () => {
+    setSortCriteria("matching");
+    setActiveButton("matching");
+    setApplications(sortApplications([...applications], "matching"));
+  };
+
+  const handleSortByQuizScore = () => {
+    setSortCriteria("quiz_score");
+    setActiveButton("quiz_score");
+    setApplications(sortApplications([...applications], "quiz_score"));
+  };
+
+  const handleSortByCombined = () => {
+    setSortCriteria("combined");
+    setActiveButton("combined");
+    setApplications(sortApplications([...applications], "combined"));
+  };
 
   return (
     <MDBContainer className="py-5">
-      <h2 className="mb-4">Applications for Job ID: {jobId}</h2>
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <h2>Applications for Job ID: {jobId}</h2>
+        <MDBBtnGroup>
+          <MDBBtn
+            color={activeButton === "matching" ? "success" : "primary"}
+            onClick={handleSortByMatching}
+          >
+            Sort by Matching
+          </MDBBtn>
+          <MDBBtn
+            color={activeButton === "quiz_score" ? "success" : "primary"}
+            onClick={handleSortByQuizScore}
+          >
+            Sort by Quiz Score
+          </MDBBtn>
+          <MDBBtn
+            color={activeButton === "combined" ? "success" : "primary"}
+            onClick={handleSortByCombined}
+          >
+            Sort by Combined
+          </MDBBtn>
+        </MDBBtnGroup>
+      </div>
       <MDBTable align="middle" hover responsive>
         <MDBTableHead>
           <tr>
@@ -72,6 +122,7 @@ const ApplicationDetailsPage: React.FC<ApplicationDetailsPageProps> = () => {
             <th scope="col">Applied Date</th>
             <th scope="col">Status</th>
             <th scope="col">Matching</th>
+            <th scope="col">Quiz Score</th>
             <th scope="col">Actions</th>
           </tr>
         </MDBTableHead>
@@ -98,11 +149,12 @@ const ApplicationDetailsPage: React.FC<ApplicationDetailsPageProps> = () => {
                 </MDBBadge>
               </td>
               <td>{Math.round(app.similarity_score || 0)}%</td>
+              <td>{Math.round(app.quiz_score || 0)}%</td>
               <td>
                 <MDBBtn
                   color="link"
                   size="sm"
-                  onClick={() => handleViewDetails(app.id)}
+                  onClick={() => navigate(`/applications/${app.id}`)}
                 >
                   View Details
                 </MDBBtn>

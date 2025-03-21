@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ABC</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            direction: rtl;
+            text-align: right;
+        }
+        #messages {
+            border: 1px solid #ddd;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+        }
+        #keys {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+<h1>مرحبًا بك في الدردشة</h1>
+<div id="messages"></div> <!-- المدخلات الخاصة بالرسائل -->
+<input type="text" id="recipientId" placeholder="معرّف المستقبل">
+<input type="text" id="messageInput" placeholder="اكتب رسالتك هنا">
+<button onclick="sendMessage()">إرسال</button>
+
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs/lib/stomp.min.js"></script>
+<script>
+    const socket = new SockJS('/ws');
+    const stompClient = Stomp.over(socket);
+    const userId = 'ABC';
+
+    stompClient.connect({}, () => {
+        console.log("تم الاتصال بـ WebSocket");
+
+        // الاشتراك في قائمة الانتظار لتلقي الرسائل
+        stompClient.subscribe(`/user/${userId}/queue/messages`, (response) => {
+            const message = JSON.parse(response.body);
+
+            // طباعة الرسالة في واجهة المستخدم
+            const messagesDiv = document.getElementById('messages');
+            messagesDiv.innerHTML += `<p><strong>${message.senderId}:</strong> ${message.content}</p>`;
+        });
+    });
+
+    function sendMessage() {
+        const recipientId = document.getElementById('recipientId').value;
+        const content = document.getElementById('messageInput').value;
+
+        stompClient.send('/app/chat', {}, JSON.stringify({
+            senderId: userId,
+            recipientId: recipientId,
+            content: content,
+
+        }));
+    }
+
+
+</script>
+</body>
+</html>

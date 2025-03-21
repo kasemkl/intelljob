@@ -192,7 +192,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         localStorage.setItem("authTokens", JSON.stringify(data));
 
-        navigate("/");
+        navigate("/jobs");
 
         return { status: response.status, data };
       } else {

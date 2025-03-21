@@ -22,7 +22,6 @@ interface JobFilters {
   search: string;
   location: string;
   category: string;
-  jobType: string;
 }
 
 const JobListPage: React.FC = () => {
@@ -35,7 +34,6 @@ const JobListPage: React.FC = () => {
     search: "",
     location: "",
     category: "",
-    jobType: "",
   });
 
   const navigate = useNavigate();
@@ -111,19 +109,7 @@ const JobListPage: React.FC = () => {
       );
     }
 
-    // Apply job type filter
-    if (filters.jobType) {
-      filtered = filtered.filter((job) => job.jobType === filters.jobType);
-    }
-
     setFilteredJobs(filtered);
-  };
-
-  const handleFilterChange = (field: keyof JobFilters, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
   };
 
   const resetFilters = () => {
@@ -131,8 +117,14 @@ const JobListPage: React.FC = () => {
       search: "",
       location: "",
       category: "",
-      jobType: "",
     });
+  };
+
+  const handleFilterChange = (field: keyof JobFilters, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   if (loading) {
@@ -174,7 +166,7 @@ const JobListPage: React.FC = () => {
             <MDBCard className="mb-4">
               <MDBCardBody>
                 <MDBRow className="g-3">
-                  <MDBCol md="6" lg="3">
+                  <MDBCol md="6" lg="4">
                     <MDBInput
                       label="Search jobs"
                       type="text"
@@ -184,7 +176,7 @@ const JobListPage: React.FC = () => {
                       }
                     />
                   </MDBCol>
-                  <MDBCol md="6" lg="3">
+                  <MDBCol md="6" lg="4">
                     <select
                       className="form-select"
                       value={filters.location}
@@ -200,7 +192,7 @@ const JobListPage: React.FC = () => {
                       ))}
                     </select>
                   </MDBCol>
-                  <MDBCol md="6" lg="3">
+                  <MDBCol md="6" lg="4">
                     <select
                       className="form-select"
                       value={filters.category}
@@ -214,21 +206,6 @@ const JobListPage: React.FC = () => {
                           {category.text}
                         </option>
                       ))}
-                    </select>
-                  </MDBCol>
-                  <MDBCol md="6" lg="3">
-                    <select
-                      className="form-select"
-                      value={filters.jobType}
-                      onChange={(e) =>
-                        handleFilterChange("jobType", e.target.value)
-                      }
-                    >
-                      <option value="">All Job Types</option>
-                      <option value="FULL_TIME">Full Time</option>
-                      <option value="PART_TIME">Part Time</option>
-                      <option value="CONTRACT">Contract</option>
-                      <option value="INTERNSHIP">Internship</option>
                     </select>
                   </MDBCol>
                 </MDBRow>

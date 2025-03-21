@@ -81,19 +81,23 @@ const CompanyApplicationsPage: React.FC = () => {
   return (
     <MDBContainer className="py-5">
       <h2 className="mb-4">Job Posts</h2>
-      {jobApplications.map((job) => (
-        <MDBCard
-          key={job.job_details.id}
-          className="mb-3"
-          onClick={() => handleJobClick(job.job_details.id)}
-          style={{ cursor: "pointer" }}
-        >
-          <MDBCardBody>
-            <h4 className="mb-3">{job.job_details.title}</h4>
-            <p>{job.job_details.description}</p>
-          </MDBCardBody>
-        </MDBCard>
-      ))}
+      {jobApplications.length === 0 ? (
+        <p>No job posts available.</p> // Display this message if there are no job posts
+      ) : (
+        jobApplications.map((job) => (
+          <MDBCard
+            key={job.job_details.id}
+            className="mb-3"
+            onClick={() => handleJobClick(job.job_details.id)}
+            style={{ cursor: "pointer" }}
+          >
+            <MDBCardBody>
+              <h4 className="mb-3">{job.job_details.title}</h4>
+              <p>{job.job_details.description}</p>
+            </MDBCardBody>
+          </MDBCard>
+        ))
+      )}
     </MDBContainer>
   );
 };

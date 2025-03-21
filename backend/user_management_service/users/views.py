@@ -328,6 +328,11 @@ class ParseCVView(APIView):
         # Ensure level stays within 1-5 range
         return max(1, min(5, level))
 
+    def get_object(self, pk):
+        try:
+            return JobSeeker.objects.get(user_id=pk)
+        except JobSeeker.DoesNotExist:
+            return None
     def post(self, request):
         if not hasattr(request.user, 'jobseeker'):
             return Response(
@@ -357,46 +362,47 @@ class ParseCVView(APIView):
             )
 
         cv_data = response.json()
-        job_seeker = request.user.jobseeker
-
+        job_seeker = self.get_object(request.user.id)
+        print(job_seeker)
         # Update JobSeeker profile with parsed data
         try:
             # Update skills with determined levels
             for skill_name in cv_data.get('skills', []):
                 skill_level = self._determine_skill_level(skill_name, cv_data)
-                skill, _ = Skill.objects.get_or_create(
-                    name=skill_name,
-                    defaults={'level': skill_level}
-                )
-                # If skill already existed, update its level
-                if skill.level == 0:  # Only update if it was at default level
-                    skill.level = skill_level
-                    skill.save()
+                skill = Skill.objects.filter(name=skill_name).first()
+                if not skill:
+                    skill = Skill.objects.create(name=skill_name, level=skill_level)
+                else:
+                    # If skill already existed, update its level
+                    if skill.level == 0:  # Only update if it was at default level
+                        skill.level = skill_level
+                        skill.save()
                 job_seeker.skills.add(skill)
 
             # Update languages
             for lang_name in cv_data.get('language', []):
-                language, _ = Language.objects.get_or_create(
-                    name=lang_name,
-                    defaults={'proficiency': 'Not specified'}
-                )
+                language = Language.objects.filter(name=lang_name).first()
+                if not language:
+                    language = Language.objects.create(name=lang_name, proficiency='Not specified')
                 job_seeker.languages.add(language)
 
             # Update certifications
             for cert_name in cv_data.get('certification', []):
-                cert, _ = Certification.objects.get_or_create(name=cert_name)
+                cert = Certification.objects.filter(name=cert_name).first()
+                if not cert:
+                    cert = Certification.objects.create(name=cert_name)
                 job_seeker.certifications.add(cert)
 
             # Update education if university info is present
             for uni in cv_data.get('university', []):
-                education, _ = Education.objects.get_or_create(
-                    institution=uni,
-                    defaults={
-                        'degree': cv_data.get('degree', [''])[0],
-                        'start_date': None,  # You might want to parse these from the CV
-                        'end_date': None
-                    }
-                )
+                education = Education.objects.filter(institution=uni).first()
+                if not education:
+                    education = Education.objects.create(
+                        institution=uni,
+                        degree=cv_data.get('degree', [''])[0],
+                        start_date=None,  # You might want to parse these from the CV
+                        end_date=None
+                    )
                 job_seeker.education.add(education)
 
             # Update other fields

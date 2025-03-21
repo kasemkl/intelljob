@@ -69,12 +69,14 @@ export const useApplicationService = () => {
     applyForJob: async (
       jobId: number,
       userId: number,
-      similarity_score: number
+      similarity_score: number,
+      job_title: string,
     ) => {
       return await applicationApi.post("/apply/", {
         job_id: jobId,
         job_seeker_id: userId,
         similarity_score: similarity_score,
+        job_title:job_title
       });
     },
 
@@ -100,6 +102,10 @@ export const useApplicationService = () => {
 
     getApplicationDetails: (applicationId: number) => {
       return applicationApi.get(`/${applicationId}`);
+    },
+
+    updateApplication: async (applicationId: number, data: any) => {
+      return await applicationApi.put(`/${applicationId}/update/`, data);
     },
   };
 };

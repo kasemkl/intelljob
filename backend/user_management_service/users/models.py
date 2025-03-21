@@ -131,7 +131,7 @@ class JobSeeker(models.Model):
 
     education = models.ManyToManyField(Education, blank=True)  # Made optional
 
-    linkedin_url = models.URLField(max_length=255, null=True, blank=True)
+    linkedin_url = models.CharField(max_length=255, null=True, blank=True)
     languages = models.ManyToManyField(Language, blank=True)
     certifications = models.ManyToManyField(Certification, blank=True)
     awards = models.JSONField(default=list, blank=True)  # Store as JSON array

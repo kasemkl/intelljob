@@ -27,7 +27,8 @@ import PersonalInfo from "../components/PersonalInfo";
 import ProfessionalInfo from "../components/ProfessionalInfo";
 import "../styles/jobseeker-profile.css";
 import CVUpload from "../components/CVUpload";
-
+import defaultPhoto from "../../src/assets/default_profile_photo.jpg";
+import { useAuth } from "../contexts/AuthContext";
 interface JobSeekerProfileProps {
   userId: number;
 }
@@ -41,7 +42,7 @@ interface UserDetails {
 
 const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
   const [profile, setProfile] = useState<JobSeekerProfileType | null>(null);
-
+  const {user}=useAuth()
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
 
   const [loading, setLoading] = useState(true);
@@ -427,7 +428,7 @@ const JobSeekerProfilePage: React.FC<JobSeekerProfileProps> = ({ userId }) => {
             />
           ) : (
             <img
-              src={userDetails?.profile_picture || "/default-profile.png"}
+              src={userDetails?.profile_picture || defaultPhoto}
               alt="Profile"
               className="profile-photo"
             />

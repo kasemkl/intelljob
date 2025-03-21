@@ -5,7 +5,7 @@ import ChangePassword from "../components/ChangePassword";
 import { MDBFile, MDBBtn } from "mdb-react-ui-kit";
 import useAxios from "../hooks/useAxios";
 import { toast } from "react-toastify";
-
+import defaultImg from '../assets/default_profile_photo.jpg'
 const Settings: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
@@ -67,10 +67,11 @@ const Settings: React.FC = () => {
           />
         ) : (
           <img
+          style={{width:'200px',height:'200px', borderRadius:'100px'}}
             src={
               profilePicture
                 ? URL.createObjectURL(profilePicture)
-                : "/default-profile.png"
+                : defaultImg
             }
             alt="Profile"
             className="profile-picture"

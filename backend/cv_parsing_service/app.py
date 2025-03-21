@@ -1,4 +1,4 @@
-from fastapi import FastAPI , UploadFile, File
+from fastapi import FastAPI , UploadFile, File,HTTPException
 from pydantic import BaseModel
 from sentence_transformers import SentenceTransformer, util
 from sklearn.metrics.pairwise import cosine_similarity
@@ -10,7 +10,17 @@ import numpy as np
 import base64
 from fastapi.middleware.cors import CORSMiddleware
 import aiohttp
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Optional, List
+import json ,re 
+from openai import OpenAI 
 
+# Initialize FastAPI app
+client = OpenAI(
+    base_url='http://localhost:11434/v1/',
+    api_key='ollama'  # this key is required but ignored in your local setup
+)
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -36,6 +46,95 @@ async def shutdown_event():
     # Close the shared ClientSession
     if app.state.http_client:
         await app.state.http_client.close()
+        
+        
+        
+        
+
+# Define the request schema.
+class QuestionRequest(BaseModel):
+    skill: str
+    difficulty: str       # e.g., "easy", "medium", "hard"
+    question_type: str    # e.g., "multiple_choice" or "true_false"
+    num_questions: int = 1
+    model: str
+
+
+def generate_questions(skill: str, difficulty: str, question_type: str, num_questions: int, model: str) -> List[dict]:
+    questions = []
+    for _ in range(num_questions):
+        prompt = (
+            f"Generate a {difficulty} {question_type} question for the skill '{skill}'. "
+            "The question should test practical knowledge and be relevant to a recruitment context. "
+            "Include one correct answer and three plausible distractors that are realistic and closely related to the correct answer. "
+            "Format the output exactly as follows:\n\n"
+            "Question: <question_text>\n"
+            "Options: [\"<option_1>\", \"<option_2>\", \"<option_3>\", \"<option_4>\"]\n"
+            "Correct Answer: <correct_option>\n\n"
+            "Output the result as JSON with the keys 'question', 'options' (a list), and 'correct_answer'.\n"
+        )
+        
+        try:
+            response = client.chat.completions.create(
+                model=model,
+                store=True,
+                messages = [
+                {
+                    'role': 'system',
+                    'content': (
+                        "You are an expert in creating test questions for recruitment platforms. "
+                        "Your questions are clear, concise, and tailored to assess specific skills. "
+                        "**Follow these rules strictly**:\n"
+                        "1. The `correct_answer` must be the **option number** (1-4) as a string, e.g., `\"1\"`.\n"
+                        "2. Options must be a list of **4 strings**, formatted exactly as shown in the example.\n"
+                        "3. Output **only valid JSON** without markdown formatting (no ```json or ```).\n"
+                        "4. Ensure distractors are plausible and relevant to the skill.\n"
+                        "**Example**:\n"
+                        "{\n"
+                        "  \"question\": \"What is the result of 5 + 3 * 2?\",\n"
+                        "  \"options\": [\"8\", \"11\", \"17\", \"10\"],\n"
+                        "  \"correct_answer\": \"2\"\n"
+                        "}"
+                    )
+                },
+                {
+                    'role': 'user',
+                    'content': (
+                        f"Generate a {difficulty} {question_type} question for the skill '{skill}'. "
+                        "The question must test **practical knowledge** relevant to a recruitment context. "
+                        "Include **1 correct answer** and **3 plausible distractors**. "
+                        "**Formatting Requirements**:\n"
+                        "- `options` must be a list of 4 strings.\n"
+                        "- `correct_answer` must be the **option number** (1-4) as a string.\n"
+                        "- Do NOT use markdown formatting (e.g., ```json).\n"
+                        "Output **ONLY** the JSON object with keys: `question`, `options`, `correct_answer`."
+                    )
+                }
+            ]
+            )
+            
+            
+            generated_str = response.choices[0].message.content.strip()
+            question_json = json.loads(generated_str)
+            questions.append(question_json)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error generating question: {e}")
+    return questions
+
+@app.post("/generate-questions/")
+def generate_questions_endpoint(request: QuestionRequest):
+    generated = generate_questions(
+        skill=request.skill,
+        difficulty=request.difficulty,
+        question_type=request.question_type,
+        num_questions=request.num_questions,
+        model=request.model
+    )
+    return {"questions": generated}
+
+
+        
+        
 # Helper function to generate embeddings
 def generate_embedding(text: str):
     embedding = model.encode(text)
@@ -213,3 +312,4 @@ async def extract_data_from_pdf(file: UploadFile = File(...)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8005)
+

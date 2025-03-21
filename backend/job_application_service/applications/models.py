@@ -16,7 +16,7 @@ class Application(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='submitted')
     applied_at = models.DateTimeField(auto_now_add=True)
     similarity_score = models.FloatField(null=True, blank=True)
-
+    quiz_score = models.FloatField(null=True, blank=True)
     def get_job_seeker_details(self):
         cache_key = f'jobseeker_details_{self.job_seeker_id}'
         cached_data = cache.get(cache_key)

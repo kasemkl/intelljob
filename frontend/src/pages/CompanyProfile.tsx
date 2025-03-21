@@ -19,7 +19,7 @@ import PersonalInfo from "../components/PersonalInfo";
 import locationService, { City } from "../services/locationService";
 
 import "../styles/company-profile.css";
-
+import defaultProfileImg from '../assets/default_profile_photo.jpg'
 interface CompanyProfileData {
   user: number;
 
@@ -309,7 +309,7 @@ const CompanyProfile: React.FC<{ userId: number }> = ({ userId }) => {
         onInputChange={handleInputChange}
       />
 
-      <MDBCard className="mt-4 info-card">
+      {/* <MDBCard className="mt-4 info-card">
         <MDBCardBody>
           <h5 className="info-section-title">
             <i className="fas fa-user-circle me-2"></i>
@@ -322,13 +322,13 @@ const CompanyProfile: React.FC<{ userId: number }> = ({ userId }) => {
             />
           ) : (
             <img
-              src={userDetails?.profile_picture || "/default-profile.png"}
+              src={userDetails?.profile_picture || defaultProfileImg}
               alt="Profile"
               className="profile-picture"
             />
           )}
         </MDBCardBody>
-      </MDBCard>
+      </MDBCard> */}
 
       <MDBCard className="mt-4 info-card">
         <MDBCardBody>

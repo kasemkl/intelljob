@@ -83,7 +83,6 @@ const JobApplicationsPage: React.FC = () => {
               <MDBTableHead>
                 <tr>
                   <th scope="col">Job Title</th>
-                  <th scope="col">Company</th>
                   <th scope="col">Applied Date</th>
                   <th scope="col">Status</th>
                 </tr>
@@ -92,7 +91,6 @@ const JobApplicationsPage: React.FC = () => {
                 {applications.map((application) => (
                   <tr key={application.id}>
                     <td>{application.job_details?.title}</td>
-                    <td>{application.job_details?.company_name}</td>
                     <td>
                       {new Date(application.applied_at).toLocaleDateString()}
                     </td>

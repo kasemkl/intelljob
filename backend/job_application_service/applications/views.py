@@ -43,9 +43,7 @@ class ApplyForJobView(APIView):
         job_status = self.verify_job_status(job_id)
         if not job_status.get('exists'):
             return Response({"error": "Job does not exist"}, status=status.HTTP_404_NOT_FOUND)
-        if not job_status.get('is_open'):
-            return Response({"error": "This job is no longer accepting applications"}, status=status.HTTP_400_BAD_REQUEST)
-
+      
         # Calculate similarity score (assuming you have this logic)
         similarity_score = request.data.get("similarity_score")
 
@@ -54,13 +52,29 @@ class ApplyForJobView(APIView):
             "job_id": job_id,
             "job_seeker_id": user_id,
             "status": "submitted",
-            "similarity_score": similarity_score,  # Save similarity score
+            "similarity_score": similarity_score,
         }
         serializer = ApplicationSerializer(data=application_data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+            # Send notification via HTTP request
+           
+        job_title=request.data.get('job_title')
+        print(job_status)
+        notification_data = {
+                    "user_id": job_status.get('company_id'),
+                    "message": f"A new application has been submitted for {job_status.get('title')}.",
+                    "role":"company"
+                }
+        print(notification_data)
+        notification_response = requests.post(
+                    f"{settings.NOTIFICATION_SERVICE_URL}notifications/notifications/",
+                    json=notification_data
+                )
+        
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        ##return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request):
         # Validate JWT and extract user info
@@ -99,7 +113,8 @@ class ApplyForJobView(APIView):
             response = requests.get(f"{settings.JOB_POSTING_SERVICE_URL}/jobPostService/{job_id}")
             if response.status_code == 200:
                 job_data = response.json()
-                return {'exists': True, 'is_open': job_data.get('status') == 'ACTIVE'}
+                print('posttttttttttt',job_data)
+                return {'exists': True, 'is_open': job_data.get('status') == 'ACTIVE','company_id':job_data.get('companyId'),'title':job_data.get('title')}
             return {'exists': False, 'is_open': False}
         except Exception:
             return {'exists': False, 'is_open': False}
@@ -131,7 +146,7 @@ class UpdateApplicationStatusView(APIView):
         token = request.headers.get("Authorization")
         if not token:
             return Response({"error": "Authorization token missing"}, status=status.HTTP_401_UNAUTHORIZED)
-
+        print("hellllooooo")
         token = token.split(" ")[1]
         user_data = verify_jwt(token)
         user_id = user_data["user_id"]
@@ -145,10 +160,27 @@ class UpdateApplicationStatusView(APIView):
         try:
             application = Application.objects.get(id=application_id)
             serializer = ApplicationStatusUpdateSerializer(application, data=request.data)
+            print(application.job_seeker_id)
             if serializer.is_valid():
                 serializer.save()
-                return Response({"message": "Application status updated"}, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+                # Retrieve job details
+            job_details = application.get_job_details()
+            if not job_details:
+                    return Response({"error": "Job details not found"}, status=status.HTTP_404_NOT_FOUND)
+
+                # Send notification to the job seeker
+            notification_data = {
+                    "user_id": application.job_seeker_id,
+                    "message": f"Your application status for job ID {job_details['title']} has been updated to {application.status}.",
+                    "role": "job_seeker"
+                }
+            notification_response = requests.post(
+                    f"http://localhost:8000/api/notifications/notifications/",
+                    json=notification_data
+                )
+            return Response({"message": "Application status updated"}, status=status.HTTP_200_OK)
+            ##return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Application.DoesNotExist:
             return Response({"error": "Application not found"}, status=status.HTTP_404_NOT_FOUND)
 

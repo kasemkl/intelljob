@@ -96,3 +96,8 @@
 .btn-link:hover {
   color: var(--text-hover) !important;
 }
+
+.make-read{
+  position: absolute;
+  right:20px !important;
+}

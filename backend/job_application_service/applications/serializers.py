@@ -58,9 +58,9 @@ class ApplicationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Application
-        fields = ['id', 'job_id', 'job_seeker_id', 'status', 'applied_at', 'job_seeker_details', 'job_details','similarity_score']
+        fields = ['id', 'job_id', 'job_seeker_id', 'status', 'applied_at', 'job_seeker_details', 'job_details','similarity_score','quiz_score']
         
 class ApplicationStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
-        fields = ['status']
+        fields = ['status','job_seeker_id']

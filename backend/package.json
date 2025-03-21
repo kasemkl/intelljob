@@ -1,0 +1,17 @@
+{
+  "scripts": {
+    "start:api_gateway": "cd api_gateway && uvicorn main:app --reload --host 0.0.0.0 --port 8004",
+    "start:ai_processing": "cd cv_parsing_service && uvicorn app:app --reload --host 0.0.0.0 --port 8005",
+    "start:user_management": "cd user_management_service && python manage.py runserver 0.0.0.0:8000",
+    "start:job_applications": "cd job_application_service && python manage.py runserver 0.0.0.0:8003",
+    "start:location": "cd location_service && python manage.py runserver 0.0.0.0:8002",
+    "start:job_posting": "cd job_posting_service && mvn spring-boot:run",
+    "start:quiz": "cd QuizApplication && mvn spring-boot:run -Dspring-boot.run.arguments=\"--server.port=8081\"",
+    "start:chat": "cd Communication_Service && mvn spring-boot:run ",
+    "start:redis": "redis-server --port 6379",
+    "start:all": "npm-run-all -p start:redis start:api_gateway start:ai_processing start:user_management start:job_applications start:location start:job_posting start:quiz start:chat"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5"
+  }
+}

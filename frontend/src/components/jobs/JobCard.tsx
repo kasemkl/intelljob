@@ -139,7 +139,8 @@ const JobCard: React.FC<JobCardProps> = React.memo(({ job }) => {
                   <MDBBadge
                     key={category.id}
                     color="info"
-                    className="text-dark me-1"
+                    className="me-1"
+                    style={{color:'var(--text-light)!important'}}
                   >
                     {category.name}
                   </MDBBadge>
@@ -150,7 +151,7 @@ const JobCard: React.FC<JobCardProps> = React.memo(({ job }) => {
 
           <div className="d-flex justify-content-between align-items-center border-top pt-3">
             <small className="text-muted">
-              Posted {formatDate(job.postDate)}
+              Posted {formatDate(job.createdAt)}
             </small>
             <div className="d-flex align-items-center text-primary">
               <small

@@ -22,6 +22,15 @@ import { Pie, Cell, Tooltip, Legend } from "recharts";
 import MyPieChart from "./../../ui/MyPieChart";
 import { City } from "../../types/city";
 
+import {
+  JobSeekerProfile as JobSeekerProfileType,
+  Skill,
+  Experience,
+  Education,
+  Language,
+  Certification,
+} from "../../types/jobseeker";
+
 const JobDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -29,11 +38,11 @@ const JobDetailPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [company, setCompany] = useState<Company | null>(null);
   const [location, setLocation] = useState<City | null>(null);
-  const api = useAxios();
   const { user } = useAuth();
   const applicationService = useApplicationService();
   const [applying, setApplying] = useState(false);
   const [similarity, setSimilarity] = useState<number | null>(null);
+  const api = useAxios();
 
   useEffect(() => {
     const fetchJob = async () => {
@@ -43,27 +52,35 @@ const JobDetailPage: React.FC = () => {
         setJob(jobResponse.data as Job);
 
         // Fetch company and location details
-        const [companyRes, locationData] = await Promise.all([
+        const [companyRes, locationData,] = await Promise.all([
           api.get(
             `/api/users-management/companiesByCompanyId/${jobResponse.data.companyId}/`
           ),
           locationService.getCity(jobResponse.data.locationId),
+
+
         ]);
 
         setCompany(companyRes.data);
         setLocation(locationData);
 
+
+        if(user.role==='job_seeker'){
+        const response = await api.get<JobSeekerProfileType>(
+          `/api/users-management/jobseekers/${user?.user_id}/`
+        );
+  
         // Fetch embeddings and calculate similarity using cvParsingApi
         const jobSeekerEmbeddingResponse = await cvParsingApi.post(
           "/generate-embedding/",
           {
-            text: "job seeker profile data here", // Replace with actual data
+            text: response.data.skills.map(skill => skill.name).join(", ")// Replace with actual data
           }
         );
         const jobEmbeddingResponse = await cvParsingApi.post(
           "/generate-embedding/",
           {
-            text: jobResponse.data.description, // Use job description
+            text: jobResponse.data.requirements.map(req => req.description).join(", "), // Use job description
           }
         );
         const similarityResponse = await cvParsingApi.post(
@@ -73,7 +90,7 @@ const JobDetailPage: React.FC = () => {
             job_embedding: jobEmbeddingResponse.data.embedding,
           }
         );
-        setSimilarity(similarityResponse.data.similarity_percentage);
+        setSimilarity(similarityResponse.data.similarity_percentage);}
       } catch (error) {
         console.error("Error fetching job details:", error);
         toast.error("Failed to load job details");
@@ -93,8 +110,13 @@ const JobDetailPage: React.FC = () => {
 
     try {
       setApplying(true);
-      await applicationService.applyForJob(job.id, user.user_id, similarity);
+      const response =await applicationService.applyForJob(job.id, user.user_id, similarity,job.title);
       toast.success("Application submitted successfully!");
+
+      const applicationId=response.data.id;
+      if (job.isQuizRequired || true) {
+        navigate(`/jobs/${job.id}/quiz-guide/${applicationId}`);
+      }
     } catch (error: any) {
       toast.error(
         error.response?.data?.error || "Failed to submit application"
@@ -210,7 +232,7 @@ const JobDetailPage: React.FC = () => {
                 </span>
               </div>
             </div>
-            {similarity !== null && (
+            {similarity !== null && user?.role === 'job_seeker' && (
               <div className="text-center">
                 <MDBTypography tag="h5" className="mb-3">
                   Profile Match

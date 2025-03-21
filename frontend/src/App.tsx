@@ -25,6 +25,10 @@ import EditJobPage from "./pages/jobs/EditJobPage";
 import LandingPage from "./pages/LandingPage";
 import AboutPage from "./pages/AboutPage";
 import ApplicationDetailView from "./pages/jobs/ApplicationDetailView";
+import QuizPage from "./pages/jobs/QuizPage";
+import QuizGuidePage from "./pages/jobs/QuizGuidePage";
+import Notifications from "./components/Notifications";
+import ChatPage from "./pages/ChatPage";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -99,6 +103,8 @@ const AppContent = () => {
             <Route path="settings" element={<Settings />} />
             <Route path="jobs" element={<JobListPage />} />
             <Route path="jobs/:id" element={<JobDetailPage />} />
+            <Route path="chats" element={<ChatPage />} />
+
             {/* Job Seeker Routes */}
             <Route
               path="jobseeker-profile"
@@ -184,6 +190,24 @@ const AppContent = () => {
                 </ProtectedRoute>
               }
             />
+            {/* Quiz Route */}
+            <Route
+              path="jobs/:jobId/quiz-guide/:applicationId"
+              element={
+                <ProtectedRoute allowedRoles={["job_seeker"]}>
+                  <QuizGuidePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="jobs/:jobId/quiz/:applicationId"
+              element={
+                <ProtectedRoute allowedRoles={["job_seeker"]}>
+                  <QuizPage />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Default Route */}
             <Route
               index
@@ -197,10 +221,13 @@ const AppContent = () => {
                 )
               }
             />
+          <Route path="/notifications" element={<Notifications />} />
           </Route>
 
           {/* Catch-all Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
+
+          {/* Notifications Route */}
         </Routes>
       </div>
       <Footer />
